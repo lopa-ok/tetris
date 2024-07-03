@@ -51,6 +51,19 @@ const COLORS = [
 let board = [];
 
 
+const lineClearSound = new Audio('line_clear.wav');
+const gameOverSound = new Audio('ggs.wav');
+
+function playLineClearSound() {
+    lineClearSound.currentTime = 0;
+    lineClearSound.play();
+}
+
+function playGameOverSound() {
+    gameOverSound.currentTime = 0;
+    gameOverSound.play();
+}
+
 function initBoard() {
     for (let row = 0; row < ROWS; row++) {
         board[row] = [];
@@ -140,7 +153,7 @@ function randomTetromino() {
 
 let currentTetromino = randomTetromino();
 let gameOver = false;
-
+let score = 0;
 
 function moveLeft() {
     if (!gameOver && isValidPosition(currentTetromino.shape, currentTetromino.offsetX - 1, currentTetromino.offsetY)) {
@@ -181,11 +194,12 @@ function dropTetrominoContinuous() {
         drawTetromino(currentTetromino.shape, currentTetromino.offsetX, currentTetromino.offsetY, currentTetromino.color);
     } else {
         mergeTetromino(currentTetromino.shape, currentTetromino.offsetX, currentTetromino.offsetY, currentTetromino.colorIdx);
-        removeFullLines();
+        let linesCleared = removeFullLines();
+        updateScore(linesCleared);
         currentTetromino = randomTetromino();
         if (!isValidPosition(currentTetromino.shape, currentTetromino.offsetX, currentTetromino.offsetY)) {
-            
-            alert("Game Over!");
+            playGameOverSound();
+            alert("Game Over! Your score: " + score);
             gameOver = true;
             initGame();
         }
@@ -194,15 +208,26 @@ function dropTetrominoContinuous() {
 
 
 function removeFullLines() {
+    let linesCleared = 0;
     for (let row = ROWS - 1; row >= 0; row--) {
         if (board[row].every(cell => cell !== 0)) {
             board.splice(row, 1);
             board.unshift(Array(COLS).fill(0));
+            linesCleared++;
             row++;
+            
         }
     }
+    return linesCleared;
 }
 
+function updateScore(linesCleared) {
+    if (linesCleared > 0) {
+        score += linesCleared * 100;
+        document.getElementById('score').innerText = 'Score: ' + score;
+        playLineClearSound();
+    }
+}
 
 document.addEventListener('keydown', event => {
     if (event.key === 'ArrowLeft') {
