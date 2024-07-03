@@ -49,6 +49,9 @@ const COLORS = [
 
 
 let board = [];
+let currentTetromino;
+let gameOver = false;
+let score = 0;
 
 
 const lineClearSound = new Audio('line_clear.wav');
@@ -134,10 +137,11 @@ function mergeTetromino(shape, offsetX, offsetY, colorIdx) {
 function initGame() {
     initBoard();
     drawBoard();
+    currentTetromino = randomTetromino();
+    gameOver = false;
+    score = 0;
 }
 
-
-initGame();
 
 
 function randomTetromino() {
@@ -151,9 +155,6 @@ function randomTetromino() {
     };
 }
 
-let currentTetromino = randomTetromino();
-let gameOver = false;
-let score = 0;
 
 function moveLeft() {
     if (!gameOver && isValidPosition(currentTetromino.shape, currentTetromino.offsetX - 1, currentTetromino.offsetY)) {
@@ -198,10 +199,16 @@ function dropTetrominoContinuous() {
         updateScore(linesCleared);
         currentTetromino = randomTetromino();
         if (!isValidPosition(currentTetromino.shape, currentTetromino.offsetX, currentTetromino.offsetY)) {
-            playGameOverSound();
-            alert("Game Over! Your score: " + score);
             gameOver = true;
-            initGame();
+            gameOverSound.play();
+            let restartGame = confirm("Game Over! Your score: " + score + "\nPress OK to restart.");
+            if (restartGame) {
+                initGame();
+            } else {
+                
+                
+                
+            }
         }
     }
 }
@@ -215,19 +222,22 @@ function removeFullLines() {
             board.unshift(Array(COLS).fill(0));
             linesCleared++;
             row++;
-            
         }
+    }
+    if (linesCleared > 0) {
+        lineClearSound.play();
     }
     return linesCleared;
 }
+
 
 function updateScore(linesCleared) {
     if (linesCleared > 0) {
         score += linesCleared * 100;
         document.getElementById('score').innerText = 'Score: ' + score;
-        playLineClearSound();
     }
 }
+
 
 document.addEventListener('keydown', event => {
     if (event.key === 'ArrowLeft') {
@@ -240,6 +250,9 @@ document.addEventListener('keydown', event => {
         rotateClockwise();
     }
 });
+
+
+initGame();
 
 
 setInterval(dropTetrominoContinuous, 1000);
