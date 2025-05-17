@@ -1,31 +1,296 @@
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center; /* Center align-items for vertical centering */
+    align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: #FCF8E8;
 }
 
-#gameContainer {
+#mainContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+#sidebarContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 32px;
+}
+
+#gameArea {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between; /* Adjust this to control spacing */
-    height: 80vh; /* Adjust the height to control vertical positioning */
+    justify-content: center;
 }
 
 #tetrisCanvas {
     width: 300px;
     height: 600px;
-    background-color: #333;
-    border: 5px solid #666;
-    margin: auto 0; /* Centers the canvas vertically within the gameContainer */
+    background-color: #D4E2D4;
+    border: 5px solid #ECB390;
+    margin: 0;
+}
+
+#nextShapeContainer {
+    margin-left: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #D4E2D4;
+    border-radius: 8px;
+    padding: 16px 0 16px 0;
+    box-shadow: 2px 2px 12px #ECB39044;
+    width: 180px;
+}
+
+#nextShapeLabel {
+    font-family: 'Press Start 2P', cursive;
+    color: #DF7861;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+#nextShapeCanvas {
+    background: #FCF8E8;
+    border: 2px solid #ECB390;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+    width: 180px;
+    height: 180px;
+    box-sizing: border-box;
 }
 
 #score {
-    position: absolute;
-    top: 20px;
+    position: static;
+    margin-bottom: 32px;
     font-size: 20px;
-    font-family: 'Press Start 2P', cursive; /* Adds the 'Press Start 2P' font */
+    font-family: 'Press Start 2P', cursive;
+    color: #DF7861;
+    background: #D4E2D4;
+    border-radius: 8px;
+    padding: 12px 24px;
+    box-shadow: 2px 2px 12px #ECB39044;
+    letter-spacing: 0.05em;
+}
+
+#startMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(223, 120, 97, 0.95); /* #DF7861 with opacity */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+#startMenu h1 {
+    color: #ECB390;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    letter-spacing: 0.2em;
+}
+
+#startButton {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+    background: #ECB390;
+    color: #DF7861;
+    border: 3px solid #DF7861;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#startButton:hover {
+    background: #DF7861;
+    color: #FCF8E8;
+}
+
+#keybindsSidebar {
+    width: 180px;
+    background: #D4E2D4;
+    border-radius: 12px;
+    box-shadow: 2px 2px 12px #ECB39044;
+    padding: 24px 18px;
+    margin-right: 32px;
+    font-family: 'Press Start 2P', cursive;
+    color: #DF7861;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#keybindsSidebar h2 {
+    font-size: 1.1rem;
+    margin: 0 0 18px 0;
+    color: #ECB390;
+    letter-spacing: 0.1em;
+}
+
+#keybindsSidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#keybindsSidebar li {
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    color: #DF7861;
+}
+
+#keybindsSidebar b {
+    color: #ECB390;
+    font-size: 1.1em;
+    margin-right: 8px;
+}
+
+#pauseMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(223, 120, 97, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+#pauseMenu h1 {
+    color: #ECB390;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    letter-spacing: 0.2em;
+}
+
+#pauseMenu button {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+    background: #ECB390;
+    color: #DF7861;
+    border: 3px solid #DF7861;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 1rem;
+}
+
+#pauseMenu button:last-child {
+    margin-bottom: 0;
+}
+
+#pauseMenu button:hover {
+    background: #DF7861;
+    color: #FCF8E8;
+}
+
+#gameOverMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(52, 73, 94, 0.97); /* dark blue overlay for visibility */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 30;
+}
+
+#gameOverMenu h1 {
+    color: #F7B267; /* orange for contrast */
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    letter-spacing: 0.2em;
+}
+
+#finalScore {
+    font-family: 'Press Start 2P', cursive;
+    color: #ECB390; /* peach for contrast */
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+#restartButton {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+    background: #F7B267; /* orange */
+    color: #34495e; /* dark blue text */
+    border: 3px solid #ECB390;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+#restartButton:hover {
+    background: #ECB390;
+    color: #34495e;
+}
+
+.menuButton {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2rem;
+    width: 260px;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border: 3px solid #DF7861;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    background: #ECB390;
+    color: #DF7861;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.menuButton:last-child {
+    margin-bottom: 0;
+}
+
+.menuButton:hover {
+    background: #DF7861;
+    color: #FCF8E8;
+}
+
+.restartButton {
+    background: #DF7861;
+    color: #FCF8E8;
+    border: 3px solid #B22222;
+    margin-top: 0.5rem;
+}
+
+.restartButton:hover {
+    background: #B22222;
+    color: #FCF8E8;
+}
+
+.restartIcon {
+    display: none;
 }

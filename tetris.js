@@ -38,20 +38,24 @@ const SHAPES = [
 
 
 const COLORS = [
-    'cyan',    // I shape
-    'yellow',  // O shape
-    'purple',  // T shape
-    'green',   // S shape
-    'red',     // Z shape
-    'orange',  // L shape
-    'blue'     // J shape
+    '#F7B267', // I shape - warm pastel orange
+    '#D4E2D4', // O shape - soft green (from your palette)
+    '#ECB390', // T shape - soft peach (from your palette)
+    '#DF7861', // S shape - coral (from your palette)
+    '#A7C7E7', // Z shape - pastel blue
+    '#B5C99A', // L shape - muted green
+    '#B084CC'  // J shape - pastel purple
 ];
 
 
 let board = [];
 let currentTetromino;
+let nextTetromino; // Add this
 let gameOver = false;
 let score = 0;
+let intervalId = null;
+let paused = false;
+let highscore = localStorage.getItem('tetrisHighscore') ? parseInt(localStorage.getItem('tetrisHighscore')) : 0;
 
 
 const lineClearSound = new Audio('line_clear.wav');
@@ -137,9 +141,15 @@ function mergeTetromino(shape, offsetX, offsetY, colorIdx) {
 function initGame() {
     initBoard();
     drawBoard();
+    nextTetromino = randomTetromino(); // Initialize next shape
     currentTetromino = randomTetromino();
     gameOver = false;
     score = 0;
+    document.getElementById('score').innerText = 'Score: ' + score;
+    drawNextShape();
+    // Clear previous interval if any
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(dropTetrominoContinuous, 1000);
 }
 
 
@@ -187,8 +197,50 @@ function rotateClockwise() {
 }
 
 
+function drawNextShape() {
+    const nextCanvas = document.getElementById('nextShapeCanvas');
+    const nextCtx = nextCanvas.getContext('2d');
+    nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+    if (!nextTetromino) return;
+
+    const shape = nextTetromino.shape;
+    const color = nextTetromino.color;
+
+    // Find shape dimensions
+    const shapeHeight = shape.length;
+    const shapeWidth = shape[0].length;
+
+    // Calculate block size to fit shape in canvas with padding
+    const padding = 10;
+    const availableWidth = nextCanvas.width - 2 * padding;
+    const availableHeight = nextCanvas.height - 2 * padding;
+    const blockSize = Math.min(
+        Math.floor(availableWidth / shapeWidth),
+        Math.floor(availableHeight / shapeHeight)
+    );
+
+    // Calculate offset to center the shape
+    const totalShapeWidth = blockSize * shapeWidth;
+    const totalShapeHeight = blockSize * shapeHeight;
+    const offsetX = Math.floor((nextCanvas.width - totalShapeWidth) / 2);
+    const offsetY = Math.floor((nextCanvas.height - totalShapeHeight) / 2);
+
+    shape.forEach((row, y) => {
+        row.forEach((block, x) => {
+            if (block) {
+                nextCtx.fillStyle = color;
+                nextCtx.fillRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+                nextCtx.strokeStyle = '#555';
+                nextCtx.strokeRect(offsetX + x * blockSize, offsetY + y * blockSize, blockSize, blockSize);
+            }
+        });
+    });
+}
+
+
 function dropTetrominoContinuous() {
-    if (gameOver) return;
+    if (gameOver || paused) return;
     if (isValidPosition(currentTetromino.shape, currentTetromino.offsetX, currentTetromino.offsetY + 1)) {
         currentTetromino.offsetY++;
         drawBoard();
@@ -197,18 +249,16 @@ function dropTetrominoContinuous() {
         mergeTetromino(currentTetromino.shape, currentTetromino.offsetX, currentTetromino.offsetY, currentTetromino.colorIdx);
         let linesCleared = removeFullLines();
         updateScore(linesCleared);
-        currentTetromino = randomTetromino();
+        currentTetromino = nextTetromino; // Use the next shape
+        nextTetromino = randomTetromino(); // Generate a new next shape
+        drawNextShape();
         if (!isValidPosition(currentTetromino.shape, currentTetromino.offsetX, currentTetromino.offsetY)) {
             gameOver = true;
             gameOverSound.play();
-            let restartGame = confirm("Game Over! Your score: " + score + "\nPress OK to restart.");
-            if (restartGame) {
-                initGame();
-            } else {
-                
-                
-                
-            }
+            clearInterval(intervalId);
+            setTimeout(() => {
+                showGameOverMenu();
+            }, 100);
         }
     }
 }
@@ -239,20 +289,163 @@ function updateScore(linesCleared) {
 }
 
 
+// Show/hide start menu
+function showStartMenu() {
+    document.getElementById('startMenu').style.display = 'flex';
+    document.getElementById('score').style.display = 'none';
+    canvas.style.display = 'none';
+}
+
+function hideStartMenu() {
+    document.getElementById('startMenu').style.display = 'none';
+    document.getElementById('score').style.display = 'block';
+    canvas.style.display = 'block';
+}
+
+function showPauseMenu() {
+    document.getElementById('pauseMenu').style.display = 'flex';
+}
+
+function hidePauseMenu() {
+    document.getElementById('pauseMenu').style.display = 'none';
+}
+
+function pauseGame() {
+    if (!paused && !gameOver) {
+        paused = true;
+        clearInterval(intervalId);
+        showPauseMenu();
+    }
+}
+
+function resumeGame() {
+    if (paused && !gameOver) {
+        paused = false;
+        hidePauseMenu();
+        intervalId = setInterval(dropTetrominoContinuous, 1000);
+    }
+}
+
+function showGameOverMenu() {
+    document.getElementById('gameOverMenu').style.display = 'flex';
+    document.getElementById('finalScore').innerText = 'Score: ' + score;
+}
+
+function hideGameOverMenu() {
+    document.getElementById('gameOverMenu').style.display = 'none';
+}
+
+
+// --- Confetti effect ---
+function launchConfetti() {
+    const confettiCanvasId = 'confettiCanvas';
+    let confettiCanvas = document.getElementById(confettiCanvasId);
+    if (!confettiCanvas) {
+        confettiCanvas = document.createElement('canvas');
+        confettiCanvas.id = confettiCanvasId;
+        confettiCanvas.style.position = 'fixed';
+        confettiCanvas.style.top = 0;
+        confettiCanvas.style.left = 0;
+        confettiCanvas.style.width = '100vw';
+        confettiCanvas.style.height = '100vh';
+        confettiCanvas.style.pointerEvents = 'none';
+        confettiCanvas.style.zIndex = 1000;
+        document.body.appendChild(confettiCanvas);
+    }
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+    const ctx = confettiCanvas.getContext('2d');
+
+    // Confetti particles
+    const colors = ['#F7B267', '#D4E2D4', '#ECB390', '#DF7861', '#A7C7E7', '#B5C99A', '#B084CC'];
+    const particles = [];
+    const count = 120;
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * confettiCanvas.width,
+            y: Math.random() * -confettiCanvas.height,
+            r: 6 + Math.random() * 6,
+            d: 2 + Math.random() * 2,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            tilt: Math.random() * 10 - 5,
+            tiltAngle: 0,
+            tiltAngleIncremental: (Math.random() * 0.07) + 0.05
+        });
+    }
+
+    let frame = 0;
+    function drawConfetti() {
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        for (let i = 0; i < count; i++) {
+            let p = particles[i];
+            ctx.beginPath();
+            ctx.lineWidth = p.r;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r / 3, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+            ctx.stroke();
+        }
+        updateConfetti();
+        frame++;
+        if (frame < 120) {
+            requestAnimationFrame(drawConfetti);
+        } else {
+            confettiCanvas.remove();
+        }
+    }
+
+    function updateConfetti() {
+        for (let i = 0; i < count; i++) {
+            let p = particles[i];
+            p.y += (Math.cos(frame / 10) + 3 + p.d) / 2;
+            p.x += Math.sin(frame / 15);
+            p.tiltAngle += p.tiltAngleIncremental;
+            p.tilt = Math.sin(p.tiltAngle) * 15;
+        }
+    }
+
+    drawConfetti();
+}
+
+
 document.addEventListener('keydown', event => {
-    if (event.key === 'ArrowLeft') {
+    if (event.key === 'Escape') {
+        if (!paused) {
+            pauseGame();
+        } else {
+            resumeGame();
+        }
+        return;
+    }
+    if (paused) return;
+    if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') {
         moveLeft();
-    } else if (event.key === 'ArrowRight') {
+    } else if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') {
         moveRight();
-    } else if (event.key === 'ArrowDown') {
+    } else if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') {
         dropTetrominoContinuous();
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') {
         rotateClockwise();
     }
 });
 
 
-initGame();
-
-
-setInterval(dropTetrominoContinuous, 1000);
+// Start menu logic
+window.addEventListener('DOMContentLoaded', () => {
+    showStartMenu();
+    document.getElementById('startButton').addEventListener('click', () => {
+        hideStartMenu();
+        initGame();
+    });
+    document.getElementById('resumeButton').addEventListener('click', () => {
+        resumeGame();
+    });
+    document.getElementById('pauseRestartButton').addEventListener('click', () => {
+        hidePauseMenu();
+        initGame();
+    });
+    document.getElementById('restartButton').addEventListener('click', () => {
+        hideGameOverMenu();
+        initGame();
+    });
+});

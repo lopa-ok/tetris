@@ -9,11 +9,52 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="mainContainer">
+        <!-- Sidebar Container: Score above Controls -->
+        <div id="sidebarContainer">
+            <div id="score">Score: 0</div>
+            <div id="keybindsSidebar">
+                <h2>Controls</h2>
+                <ul>
+                    <li><b>←</b> Move Left</li>
+                    <li><b>→</b> Move Right</li>
+                    <li><b>↑</b> Rotate</li>
+                    <li><b>↓</b> Soft Drop</li>
+                </ul>
+            </div>
+        </div>
+        <div id="gameArea">
+            <canvas id="tetrisCanvas" width="300" height="600"></canvas>
+        </div>
+        <div id="nextShapeContainer">
+            <div id="nextShapeLabel">Next Shape</div>
+            <canvas id="nextShapeCanvas" width="180" height="180"></canvas>
+        </div>
+    </div>
+    <!-- Pause Menu Overlay -->
+    <div id="pauseMenu" style="display:none;">
+        <h1>Paused</h1>
+        <button id="resumeButton" class="menuButton">Resume</button>
+        <button id="pauseRestartButton" class="menuButton restartButton">
+            Restart
+        </button>
+    </div>
+    <!-- Game Over Menu Overlay -->
+    <div id="gameOverMenu" style="display:none;">
+        <h1>Game Over</h1>
+        <div id="finalScore"></div>
+        <button id="restartButton" class="menuButton restartButton">
+            Restart
+        </button>
+    </div>
+    <!-- Start Menu Overlay -->
+    <div id="startMenu">
+        <h1>TETRIS</h1>
+        <button id="startButton">Start Game</button>
+    </div>
+
     <audio id="lineClearSound" src="line_clear.wav" preload="auto"></audio>
     <audio id="gameOverSound" src="ggs.wav" preload="auto"></audio>
-
-    <canvas id="tetrisCanvas" width="300" height="600"></canvas>
-    <div id="score">Score: 0</div>
     <script src="tetris.js"></script>
 </body>
 </html>
